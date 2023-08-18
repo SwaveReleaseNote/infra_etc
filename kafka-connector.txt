@@ -1,0 +1,56 @@
+curl --location --request POST 'http://localhost:8083/connectors' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "source-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "tasks.max": "1",
+    "database.hostname": "urnr",
+    "database.port": "6447",
+    "database.user": "root",
+    "database.password": "admin",
+    "database.server.id": "184054",
+    "database.server.name": "db",
+    "database.allowPublicKeyRetrieval": "true",
+    "database.include.list": "release_note",
+    "database.history.kafka.bootstrap.servers": "urnr-kafka:9092",
+    "database.history.kafka.topic": "dbhistory.testdb",
+    "time.precision.mode":"connect",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "true",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true",
+    "transforms": "unwrap,addTopicPrefix",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode":"none",
+    "transforms.addTopicPrefix.type":"org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.addTopicPrefix.regex":"(.*)",
+    "transforms.addTopicPrefix.replacement":"$1"
+  }
+}'
+
+curl --location --request POST 'http://localhost:8083/connectors' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "sink-connector",
+  "config": {
+    "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
+    "topics.regex": "db.release_note.(.*)",
+    "connection.url": "http://opensearch-cluster-master:9200",
+    "connection.username": "admin",
+    "connection.password": "admin",
+    "type.name": "project",
+    "tasks.max": "1",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "schema.ignore": "true",
+    "transforms": "ExtractField,dropPrefix",
+    "transforms.ExtractField.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
+    "transforms.ExtractField.field": "payload",
+    "transforms.dropPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.dropPrefix.regex": "db.release_note.(.*)",
+    "transforms.dropPrefix.replacement": "$1"
+  }
+}'

@@ -1,0 +1,19 @@
+PUT user_in_project
+{
+  "mappings" : {
+    "properties" : {
+      "user_in_project_id": {
+        "type" : "integer"
+      },
+      "user_id": {
+        "type" : "integer"
+      },
+      "project_id": {
+        "type" : "integer"
+      },
+      "role": {
+        "type" : "integer"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+FROM bitnami/kafka:latest
+
+RUN mkdir -p /opt/bitnami/kafka/plugins
+
+RUN curl -o /opt/bitnami/kafka/plugins/opensearch-connector-for-apache-kafka-3.1.0.tar -L https://github.com/Aiven-Open/opensearch-connector-for-apache-kafka/releases/download/v3.1.0/opensearch-connector-for-apache-kafka-3.1.0.tar \
+    && curl -o /opt/bitnami/kafka/plugins/debezium-connector-mysql-1.9.7.Final-plugin.tar.gz -L https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/1.9.7.Final/debezium-connector-mysql-1.9.7.Final-plugin.tar.gz \
+    && chmod +x /opt/bitnami/kafka/plugins/opensearch-connector-for-apache-kafka-3.1.0.tar \
+    && chmod +x /opt/bitnami/kafka/plugins/debezium-connector-mysql-1.9.7.Final-plugin.tar.gz \
+    && tar -zxvf /opt/bitnami/kafka/plugins/debezium-connector-mysql-1.9.7.Final-plugin.tar.gz -C /opt/bitnami/kafka/plugins \
+    && tar xvf /opt/bitnami/kafka/plugins/opensearch-connector-for-apache-kafka-3.1.0.tar -C /opt/bitnami/kafka/plugins
+
+RUN sed -i 's/#plugin.path=.*/plugin.path = \/opt\/bitnami\/kafka\/plugins/g' /opt/bitnami/kafka/config/connect-distributed.properties
